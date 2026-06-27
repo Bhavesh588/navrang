@@ -1,0 +1,100 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p8
+*.p12
+*.jks
+*.keystore
+*.mobileprovision
+GoogleService-Info.plist
+google-services.json
+
+# Logs and runtime files
+logs/
+**/logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+pids/
+*.pid
+*.pid.lock
+
+# Test and coverage output
+coverage/
+**/coverage/
+.nyc_output/
+*.lcov
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Build output and caches
+dist/
+**/dist/
+build/
+**/build/
+.cache/
+**/.cache/
+.parcel-cache/
+.eslintcache
+.turbo/
+.next/
+.nuxt/
+.serverless/
+.fusebox/
+*.tsbuildinfo
+
+# Expo and React Native
+.expo/
+**/.expo/
+expo-env.d.ts
+web-build/
+**/web-build/
+.metro-health-check*
+.kotlin/
+ios/
+android/
+**/ios/
+**/android/
+*.orig.*
+
+# App generated/local data
+uploads/
+**/uploads/
+export/
+**/export/
+tmp/
+temp/
+*.tmp
+
+# Package manager caches
+.npm/
+.pnpm-store/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.yarn-integrity
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# Local experiment/generated app folders
+app-example/
