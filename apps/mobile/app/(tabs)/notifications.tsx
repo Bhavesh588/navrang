@@ -1,16 +1,23 @@
 import React from 'react'
-import { FlatList, Pressable, Text, View } from 'react-native'
+import { FlatList, ListRenderItem, Pressable, Text, View } from 'react-native'
 import { useNotifications, useMarkNotificationRead } from '@navrang/core'
+
+type NotificationItem = {
+  id: number | string
+  message: string
+  created_at: string
+  is_read: boolean
+}
 
 export default function NotificationsScreen() {
   const { data: notifications = [], isLoading, isError } = useNotifications()
   const markReadMutation = useMarkNotificationRead()
 
-  const handleMarkRead = (id) => {
+  const handleMarkRead = (id: NotificationItem['id']) => {
     markReadMutation.mutate(id)
   }
 
-  const renderItem = ({ item }) => (
+  const renderItem: ListRenderItem<NotificationItem> = ({ item }) => (
     <View
       style={{
         padding: 12,

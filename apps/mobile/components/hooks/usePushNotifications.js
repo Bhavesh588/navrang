@@ -1,7 +1,7 @@
 import * as Notifications from 'expo-notifications'
 import Constants from 'expo-constants'
 import * as Device from 'expo-device';
-import { use, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useRegisterDeviceToken } from '@navrang/core'
 import { StyleSheet } from 'react-native'
 
@@ -19,12 +19,16 @@ import { StyleSheet } from 'react-native'
 // Track if we've already configured the handler (globally, once)
 let notificationHandlerConfigured = false
 
-function usePushNotifications() {
+function usePushNotifications(enabled = true) {
   const registerDeviceTokenMutation = useRegisterDeviceToken()
   const listenerRefsRef = useRef({})
+  const isExpoGo = Constants.appOwnership === 'expo'
   // console.log('usePushNotifications hook initialized')
 
   useEffect(() => {
+    if (!enabled) return
+    if (isExpoGo) return
+
     (async () => {
       const { status } = await Notifications.requestPermissionsAsync()
       if (status !== 'granted') {
@@ -36,6 +40,8 @@ function usePushNotifications() {
 
   const triggerNotification = async () => {
     try {
+      if (isExpoGo) return
+
       const { status } = await Notifications.getPermissionsAsync()
       if (status !== 'granted') {
         console.warn('Cannot trigger notification: permissions not granted')
@@ -57,6 +63,9 @@ function usePushNotifications() {
 
   // Step 4: Set up notification handler FIRST (one-time, global)
   useEffect(() => {
+    if (!enabled) return
+    if (isExpoGo) return
+
     if (notificationHandlerConfigured) {
       return
     }
@@ -76,10 +85,13 @@ function usePushNotifications() {
     } catch (error) {
       console.error('❌ Failed to configure notification handler:', error)
     }
-  }, [])
+  }, [enabled, isExpoGo])
 
   // Step 5: Listen for incoming notifications (ONLY after handler is set up)
   useEffect(() => {
+    if (!enabled) return
+    if (isExpoGo) return
+
     // Skip if not on device or handler not yet configured
     if (!Device.isDevice) {
       console.log('Skipping notification listeners: not on physical device')
@@ -120,10 +132,16 @@ function usePushNotifications() {
       listenerRefsRef.current.notification?.remove()
       listenerRefsRef.current.response?.remove()
     }
-  }, [])
+  }, [enabled, isExpoGo])
 
   // Step 1-3: Request permissions, get token, and register with backend
   useEffect(() => {
+    if (!enabled) return
+    if (isExpoGo) {
+      console.log('Skipping remote push notification setup in Expo Go. Use a development build to test push notifications.')
+      return
+    }
+
     if (!Device.isDevice) {
       console.log('Skipping token registration: not on physical device')
       return
@@ -180,7 +198,7 @@ function usePushNotifications() {
     }
 
     setupToken()
-  }, [])
+  }, [enabled, isExpoGo])
 
   // return (
   //   <View style={styles.container}>

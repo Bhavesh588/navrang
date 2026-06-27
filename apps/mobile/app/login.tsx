@@ -21,6 +21,13 @@ export default function LoginScreen() {
     loginMutation.mutate({ email, password })
   }
 
+  const loginError = loginMutation.error
+  const errorMessage =
+    loginError?.response?.data?.message ||
+    (loginError?.request ? 'Could not connect to backend. Check API URL and backend server.' : null) ||
+    loginError?.message ||
+    'Login failed'
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
@@ -50,7 +57,7 @@ export default function LoginScreen() {
 
       {loginMutation.isError && (
         <Text style={styles.error}>
-          {loginMutation.error?.response?.data?.message || 'Login failed'}
+          {errorMessage}
         </Text>
       )}
 

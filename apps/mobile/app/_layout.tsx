@@ -1,3 +1,4 @@
+import './bootstrap/storageAdapter'
 import { Stack } from 'expo-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useAuth } from '@navrang/core'
@@ -12,8 +13,8 @@ function RootNavigator() {
   const { isAuthenticated, loading } = useAuth()
   const router = useRouter()
 
-  // Initialize push notifications (happens automatically on mount)
-  usePushNotifications()
+  // Register push notifications only after auth has initialized.
+  usePushNotifications(isAuthenticated && !loading)
 
   useEffect(() => {
     console.log('Auth status changed:', { isAuthenticated, loading })
@@ -40,5 +41,4 @@ export default function RootLayout() {
     </QueryClientProvider>
   )
 }
-
 

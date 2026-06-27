@@ -13,6 +13,7 @@
     },
     "android": {
       "permissions": [
+        "android.permission.POST_NOTIFICATIONS",
         "android.permission.POST_NOTIFICATIONS"
       ],
       "adaptiveIcon": {
@@ -55,6 +56,12 @@
         "projectId": "449b4037-c9c4-4423-b33b-88e081a807b4"
       }
     },
-    "owner": "bhavesh0078"
+    "owner": "bhavesh0078",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/449b4037-c9c4-4423-b33b-88e081a807b4"
+    }
   }
 }
