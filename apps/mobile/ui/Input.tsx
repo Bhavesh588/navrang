@@ -8,6 +8,8 @@ export const Input = (props: Props) => {
     <TextInput
       {...props}
       placeholderTextColor={colors.muted}
+      selectionColor={colors.primary}
+      cursorColor={colors.primary}
       style={[styles.input, props.style]}
     />
   )
@@ -21,5 +23,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     marginBottom: spacing.sm,
     backgroundColor: colors.surface,
+    color: colors.text,
   },
 })
