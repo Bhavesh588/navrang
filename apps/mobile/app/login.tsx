@@ -8,6 +8,7 @@ import { useLogin } from '@navrang/core'
 import { Button } from '@/ui/Button'
 import { Input } from '@/ui/Input'
 import { storage } from '@navrang/core/services/storage'
+import http from '@navrang/core/services/http'
 
 export default function LoginScreen() {
   const loginMutation = useLogin()
@@ -30,6 +31,7 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
+      <Text>{http.defaults.baseURL}</Text>
       <Text style={styles.title}>Login</Text>
 
       <Input
