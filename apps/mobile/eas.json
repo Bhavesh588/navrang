@@ -16,14 +16,14 @@
       "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_APP_ENV": "production",
-        "EXPO_PUBLIC_API_URL": "http://navrang.bhaveshack.com/api/v1"
+        "EXPO_PUBLIC_API_URL": "https://navrang.bhaveshack.com/api/v1"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_APP_ENV": "production",
-        "EXPO_PUBLIC_API_URL": "http://navrang.bhaveshack.com/api/v1"
+        "EXPO_PUBLIC_API_URL": "https://navrang.bhaveshack.com/api/v1"
       }
     }
   },
