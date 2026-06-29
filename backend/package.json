@@ -5,8 +5,8 @@
   "scripts": {
     "start": "node server.js",
     "server": "nodemon server.js",
-    "test": "jest --detectOpenHandles --forceExit",
-    "test:mvp": "jest --detectOpenHandles --forceExit __tests__/mvp-sales.test.js",
+    "test": "set NODE_ENV=test&& jest --detectOpenHandles --forceExit",
+    "test:mvp": "set NODE_ENV=test&& jest --detectOpenHandles --forceExit __tests__/mvp-sales.test.js",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:verbose": "jest --verbose",

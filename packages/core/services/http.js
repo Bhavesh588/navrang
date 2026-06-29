@@ -1,20 +1,34 @@
 import axios from 'axios'
 import { getToken } from './authToken'
 
-const envApiUrl =
-  (typeof process !== 'undefined' && process.env && process.env.API_URL) ||
+const env =
+  typeof process !== 'undefined' && process.env
+    ? process.env
+    : {}
+
+const manualApiUrl =
+  env.EXPO_PUBLIC_API_URL ||
+  env.API_URL ||
   (typeof global !== 'undefined' && global.__API_URL__)
 
 const isReactNative =
   typeof navigator !== 'undefined' && navigator.product === 'ReactNative'
 
-  
+const isDev =
+  env.EXPO_PUBLIC_APP_ENV
+    ? env.EXPO_PUBLIC_APP_ENV !== 'production'
+    : typeof __DEV__ !== 'undefined'
+      ? __DEV__
+      : env.NODE_ENV !== 'production'
+
+const devApiUrl = env.EXPO_PUBLIC_DEV_API_URL || 'http://localhost:5000/api/v1'
+const prodApiUrl = env.EXPO_PUBLIC_PROD_API_URL || 'https://navrang.bhaveshack.com/api/v1'
+
 let defaultBaseURL
-if (envApiUrl) {
-  defaultBaseURL = envApiUrl
+if (manualApiUrl) {
+  defaultBaseURL = manualApiUrl
 } else if (isReactNative) {
-  // Common Android emulator host for localhost; adjust if your backend runs elsewhere
-  defaultBaseURL = 'http://192.168.1.2:5000/api/v1'
+  defaultBaseURL = isDev ? devApiUrl : prodApiUrl
 } else {
   defaultBaseURL = '/api/v1'
 }

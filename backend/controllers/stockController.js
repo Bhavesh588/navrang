@@ -3,6 +3,8 @@ const departmentModel = require('../models/departmentModel');
 const categoryModel = require('../models/categoryModel');
 const asyncHandler = require('../middlewares/asyncHandler');
 const logger = require('../utils/logger');
+const notificationService = require('../utils/notificationService');
+const { isAdmin, canCreateInDepartment } = require('../utils/authorization');
 
 module.exports = {
   // Get all stocks
@@ -87,6 +89,18 @@ module.exports = {
         message: 'Category not found'
       });
     }
+
+    const hasDepartmentAccess = await canCreateInDepartment(req.user.id, department_id);
+    if (!hasDepartmentAccess) {
+      logger.warn('Stock creation failed - department access denied', {
+        userId: req.user.id,
+        department_id
+      });
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have access to this department'
+      });
+    }
     
     const stock = await stockModel.createStock({
       name,
@@ -94,6 +108,14 @@ module.exports = {
       category_id,
       current_quantity: current_quantity || 0
     });
+
+    if (!isAdmin(req.user.role_name)) {
+      await notificationService.notify({
+        type: 'STOCK_ADD',
+        referenceId: stock.id,
+        message: `New stock created: ${stock.name} (${current_quantity || 0} units)`
+      });
+    }
     
     logger.info('Stock created successfully', { stockId: stock.id, name, department_id, category_id, quantity: current_quantity || 0 });
     

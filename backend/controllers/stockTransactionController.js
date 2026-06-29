@@ -5,6 +5,7 @@ const departmentModel = require('../models/departmentModel');
 const notificationService = require('../utils/notificationService');
 const asyncHandler = require('../middlewares/asyncHandler');
 const logger = require('../utils/logger');
+const { isAdmin } = require('../utils/authorization');
 
 module.exports = {
   // Get all stock transactions
@@ -151,17 +152,16 @@ module.exports = {
       remarks: remarks || null
     });
     
-    // Create notification (and queue push to admins)
-    const notificationMsg = `Stock ${action_type === 'ADD' ? 'added' : 'removed'}: ${quantity} units of ${stock.name}`;
-    const notificationType = action_type === 'ADD' ? 'STOCK_ADD' : 'STOCK_REMOVE';
+    if (!isAdmin(user.role_name)) {
+      const notificationMsg = `Stock ${action_type === 'ADD' ? 'added' : 'removed'}: ${quantity} units of ${stock.name}`;
+      const notificationType = action_type === 'ADD' ? 'STOCK_ADD' : 'STOCK_REMOVE';
 
-    // Always notify admins about stock changes (regardless of who made the change)
-    await notificationService.notify({
-      type: notificationType,
-      referenceId: transaction.id,
-      message: notificationMsg
-      // recipients: { userIds: [...] } // optional (defaults to admin users)
-    });
+      await notificationService.notify({
+        type: notificationType,
+        referenceId: transaction.id,
+        message: notificationMsg
+      });
+    }
 
     logger.info('Stock transaction created successfully', { transactionId: transaction.id, action_type, quantity });
 

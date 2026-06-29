@@ -83,7 +83,7 @@ router.get('/', authenticate, stockController.getAllStocks);
 router.get('/:id', authenticate, stockController.getStockById);
 router.get('/department/:departmentId', authenticate, departmentAccess, stockController.getStocksByDepartment);
 router.get('/category/:categoryId', authenticate, stockController.getStocksByCategory);
-router.post('/', authenticate, authorize('admin'), validateBody(['name', 'category_id', 'department_id']), stockController.createStock);
+router.post('/', authenticate, validateBody(['name', 'category_id', 'department_id']), stockController.createStock);
 router.put('/:id', authenticate, authorize('admin'), stockController.updateStock);
 router.delete('/:id', authenticate, authorize('admin'), stockController.deleteStock);
 

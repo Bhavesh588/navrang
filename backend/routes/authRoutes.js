@@ -29,6 +29,12 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // const new_password = "password123";
+
+    // bcrypt.hash(new_password, 10, (err, hash) => {
+    //   console.log("Hash: ", hash);
+    // });
+
     // Validate input
     if (!email || !password) {
       return res.status(400).json({

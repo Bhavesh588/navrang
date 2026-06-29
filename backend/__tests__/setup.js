@@ -1,3 +1,4 @@
+process.env.NODE_ENV = 'test';
 const request = require('supertest');
 const app = require('./app');
 const knex = require('knex');
@@ -7,10 +8,11 @@ const dbConfig = require('../config/dbConfig');
 const testDb = knex({
   client: 'mysql2',
   connection: {
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || 'Bh@99090',
-    database: process.env.DB_NAME || 'navrang_test',
+    host: process.env.MYSQL_TEST_HOST || process.env.DB_HOST || 'localhost',
+    port: process.env.MYSQL_TEST_PORT || process.env.DB_PORT || 3306,
+    user: process.env.MYSQL_TEST_USER || process.env.DB_USER || 'root',
+    password: process.env.MYSQL_TEST_PASSWORD || process.env.DB_PASSWORD,
+    database: process.env.MYSQL_TEST_DATABASE || process.env.DB_NAME || 'navrang_test',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0

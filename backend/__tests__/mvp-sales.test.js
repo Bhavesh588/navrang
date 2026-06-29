@@ -1,3 +1,4 @@
+process.env.NODE_ENV = 'test';
 const path = require('path');
 const { app, request } = require('./setup');
 const db = require('../config/dbConfig');
@@ -7,6 +8,10 @@ const EMPLOYEE_TOKEN = 'Bearer fake_employee_token';
 const OTHER_EMPLOYEE_TOKEN = 'Bearer fake_other_employee_token';
 
 async function resetDatabase() {
+  const databaseName = db.client.config.connection.database || '';
+  if (!databaseName.toLowerCase().includes('test')) {
+    throw new Error(`Refusing to reset non-test database: ${databaseName}`);
+  }
   await db.raw('SET FOREIGN_KEY_CHECKS = 0');
   await db('notification_queue').del();
   await db('device_tokens').del();
@@ -252,6 +257,102 @@ describe('MVP Sales Flow', () => {
     const queueItems = await db('notification_queue').where({ notification_id: notifications[0].id });
     expect(queueItems).toHaveLength(1);
     expect(queueItems[0].push_token).toBe('ExponentPushToken[test-admin]');
+  });
+
+  it('sends a notification to admins when an employee adds stock', async () => {
+    const response = await request(app)
+      .post('/api/v1/stocks/1/add')
+      .set('Authorization', EMPLOYEE_TOKEN)
+      .send({
+        quantity: 5,
+        remarks: 'Employee stock entry'
+      });
+
+    expect(response.status).toBe(201);
+    expect(await getStockQuantity(1)).toBe(105);
+
+    const notifications = await db('notifications').where({ type: 'STOCK_ADD' });
+    expect(notifications).toHaveLength(1);
+    expect(notifications[0].message).toContain('Stock added: 5 units of Blue Saree');
+
+    const queueItems = await db('notification_queue').where({ notification_id: notifications[0].id });
+    expect(queueItems).toHaveLength(1);
+    expect(queueItems[0].push_token).toBe('ExponentPushToken[test-admin]');
+  });
+
+  it('does not send a notification when an admin adds stock', async () => {
+    const response = await request(app)
+      .post('/api/v1/stocks/1/add')
+      .set('Authorization', ADMIN_TOKEN)
+      .send({
+        quantity: 5,
+        remarks: 'Admin stock entry'
+      });
+
+    expect(response.status).toBe(201);
+    expect(await getStockQuantity(1)).toBe(105);
+
+    const notifications = await db('notifications').whereIn('type', ['STOCK_ADD', 'STOCK_REMOVE']);
+    expect(notifications).toHaveLength(0);
+  });
+
+  it('allows an employee to create stock in their department and notifies admins', async () => {
+    const response = await request(app)
+      .post('/api/v1/stocks')
+      .set('Authorization', EMPLOYEE_TOKEN)
+      .send({
+        name: 'Employee Created Stock',
+        department_id: 1,
+        category_id: 1,
+        current_quantity: 12
+      });
+
+    expect(response.status).toBe(201);
+    expect(response.body.data.name).toBe('Employee Created Stock');
+    expect(response.body.data.department_id).toBe(1);
+
+    const notifications = await db('notifications').where({ type: 'STOCK_ADD' });
+    expect(notifications).toHaveLength(1);
+    expect(notifications[0].message).toContain('New stock created: Employee Created Stock');
+
+    const queueItems = await db('notification_queue').where({ notification_id: notifications[0].id });
+    expect(queueItems).toHaveLength(1);
+    expect(queueItems[0].push_token).toBe('ExponentPushToken[test-admin]');
+  });
+
+  it('allows an admin to create stock without sending notifications', async () => {
+    const response = await request(app)
+      .post('/api/v1/stocks')
+      .set('Authorization', ADMIN_TOKEN)
+      .send({
+        name: 'Admin Created Stock',
+        department_id: 2,
+        category_id: 2,
+        current_quantity: 15
+      });
+
+    expect(response.status).toBe(201);
+    expect(response.body.data.name).toBe('Admin Created Stock');
+    expect(response.body.data.department_id).toBe(2);
+
+    const notifications = await db('notifications').where({ type: 'STOCK_ADD' });
+    expect(notifications).toHaveLength(0);
+  });
+
+  it('blocks an employee from creating stock outside their departments', async () => {
+    const response = await request(app)
+      .post('/api/v1/stocks')
+      .set('Authorization', EMPLOYEE_TOKEN)
+      .send({
+        name: 'Unauthorized Stock',
+        department_id: 2,
+        category_id: 2,
+        current_quantity: 12
+      });
+
+    expect(response.status).toBe(403);
+    expect(await db('stocks').where({ name: 'Unauthorized Stock' })).toHaveLength(0);
+    expect(await db('notifications')).toHaveLength(0);
   });
 
   it('blocks an employee from selling stock outside their departments', async () => {

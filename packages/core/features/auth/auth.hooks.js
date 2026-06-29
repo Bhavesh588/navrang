@@ -19,13 +19,27 @@ export const useAuth = () => {
     let isMounted = true
 
     const init = async () => {
-      const t = await getToken()
-      
-      if (isMounted) {
-        setTokenState(t)
-        console.log("Decoded token:", decodeToken(t))
-        await storage.set("user", JSON.stringify(decodeToken(t)))
-        setLoading(false)
+      try {
+        const t = await getToken()
+        const decodedUser = t ? decodeToken(t) : null
+
+        if (isMounted) {
+          setTokenState(t)
+          if (decodedUser) {
+            await storage.set("user", JSON.stringify(decodedUser))
+          } else {
+            await storage.remove("user")
+          }
+        }
+      } catch (error) {
+        console.log("Auth initialization failed:", error)
+        if (isMounted) {
+          setTokenState(null)
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
       }
     }
 
@@ -61,8 +75,13 @@ export const useLogin = () => {
     mutationFn: loginApi,
     onSuccess: async (res) => {
       const token = res?.data?.token
-      if (token) setToken(token)
-      await storage.set("user", JSON.stringify(decodeToken(token)))
+      if (!token) return
+
+      const decodedUser = decodeToken(token)
+      await setToken(token)
+      if (decodedUser) {
+        await storage.set("user", JSON.stringify(decodedUser))
+      }
       qc.invalidateQueries()
     },
   })
