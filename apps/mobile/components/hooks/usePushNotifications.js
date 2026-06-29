@@ -6,6 +6,7 @@ import { useRegisterDeviceToken } from '@navrang/core'
 
 let notificationHandlerConfigured = false
 let NotificationsModule = null
+const EAS_PROJECT_ID = '449b4037-c9c4-4423-b33b-88e081a807b4'
 
 function getNotificationsModule() {
   if (!NotificationsModule) {
@@ -19,6 +20,7 @@ function usePushNotifications(enabled = true) {
   const registerDeviceTokenMutation = useRegisterDeviceToken()
   const listenerRefsRef = useRef({})
   const hasRegisteredTokenRef = useRef(false)
+  const hasShownErrorRef = useRef(false)
   const isExpoGo = Constants.appOwnership === 'expo'
 
   useEffect(() => {
@@ -103,7 +105,17 @@ function usePushNotifications(enabled = true) {
           return
         }
 
-        const projectId = Constants.expoConfig?.extra?.eas?.projectId || Constants.easConfig?.projectId
+        const projectId =
+          Constants.expoConfig?.extra?.eas?.projectId ||
+          Constants.easConfig?.projectId ||
+          EAS_PROJECT_ID
+
+        console.log('Push setup context:', {
+          appOwnership: Constants.appOwnership,
+          projectId,
+          isDevice: Device.isDevice,
+        })
+
         if (!projectId) {
           throw new Error('No EAS projectId found in app config')
         }
@@ -136,7 +148,8 @@ function usePushNotifications(enabled = true) {
           data: error?.response?.data,
         })
 
-        if (__DEV__) {
+        if (!hasShownErrorRef.current) {
+          hasShownErrorRef.current = true
           Alert.alert('Push setup failed', message)
         }
       }
