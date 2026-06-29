@@ -1,4 +1,5 @@
 const notificationQueueModel = require('../models/notificationQueueModel');
+const deviceTokenModel = require('../models/deviceTokenModel');
 const { sendPushNotifications } = require('./pushService');
 const logger = require('./logger');
 
@@ -20,6 +21,11 @@ async function processQueue() {
       const hasError = Array.isArray(tickets) && tickets.some(ticket => ticket.status === 'error');
 
       if (hasError) {
+        const deviceNotRegistered = tickets.some(ticket => ticket.details?.error === 'DeviceNotRegistered');
+        if (deviceNotRegistered) {
+          await deviceTokenModel.deactivateToken(item.push_token);
+        }
+
         const errReason = tickets
           .filter(ticket => ticket.status === 'error')
           .map(ticket => ticket.details?.error || ticket.message)

@@ -22,7 +22,11 @@ module.exports = {
       push_token: token
     });
 
-    logger.info('Registered device push token', { userId, platform });
+    logger.info('Registered device push token', {
+      userId,
+      platform,
+      tokenPrefix: token.substring(0, 24)
+    });
 
     res.json({ success: true, data: record, message: 'Push token registered' });
   }),
