@@ -60,9 +60,7 @@ module.exports = {
       },
     },
     owner: 'bhavesh0078',
-    runtimeVersion: {
-      policy: 'appVersion',
-    },
+    runtimeVersion: '1.0.0',
     updates: {
       url: 'https://u.expo.dev/449b4037-c9c4-4423-b33b-88e081a807b4',
     },
