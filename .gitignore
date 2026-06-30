@@ -65,6 +65,9 @@ ios/
 android/
 **/ios/
 **/android/
+!apps/mobile/android/
+!apps/mobile/android/**
+apps/mobile/android/app/google-services.json
 *.orig.*
 
 # App generated/local data
